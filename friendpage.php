@@ -17,9 +17,13 @@
             color: #bbb; /* Slightly less bright for date */
         }
         .modal-confirm {
-            background-color: black;
+            background-color: #2c2c2c;
             color: white;
             border: 2px solid yellow;
+            text-align: center; /* Center text in the modal */
+        }
+        .modal-body .amount {
+            font-weight: bold;
         }
     </style>
 </head>
@@ -28,7 +32,7 @@
         <!-- Header -->
         <div class="d-flex justify-content-between align-items-center pb-3 border-bottom border-secondary">
             <div class="d-flex align-items-center">
-                <span class="back-arrow me-3" style="cursor: pointer;" onclick="window.location.href='home.html'">&larr;</span>
+                <span class="back-arrow me-3" style="cursor: pointer;">&larr;</span>
                 <span class="header-title fs-5 fw-bold">FirstName LastName</span>
             </div>
             <div class="balance fs-5 fw-bold text-success">Rs. 1200.00</div>
@@ -82,17 +86,18 @@
 
     <!-- Confirmation Modal -->
     <div class="modal fade" id="settleModal" tabindex="-1" aria-labelledby="settleModalLabel" aria-hidden="true">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-dialog-centered"> <!-- Center the modal vertically -->
             <div class="modal-content modal-confirm">
                 <div class="modal-header">
                     <h5 class="modal-title" id="settleModalLabel">Settlement Confirmation</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    You paid FirstName Rs. 100
+                    You paid <strong>FirstName</strong><br>
+                    <span class="amount">Rs. 100</span>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Confirm</button>
+                    <button type="button" class="btn btn-dark" data-bs-dismiss="modal">Confirm</button>
                 </div>
             </div>
         </div>
@@ -100,6 +105,10 @@
 
     <script>
         $(document).ready(function() {
+            $('.back-arrow').on('click', function() {
+                alert('Going back!');
+            });
+
             $('.btn-settle').on('click', function() {
                 $('#settleModal').modal('show');
             });

@@ -4,96 +4,120 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Expense</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        /* Full screen background and font styling */
+        /* Body and Background */
         body {
-            background-color: #121212;
-            color: #fff;
+            background-color: #141414;
+            color: #FFFFFF;
             font-family: Arial, sans-serif;
-            margin: 0;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
             padding: 20px;
         }
 
-        /* Header */
-        .header {
+        /* Page Header */
+        .page-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 20px;
             display: flex;
             align-items: center;
-            margin-bottom: 20px;
         }
+
         .back-arrow {
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: #ccc;
+            font-size: 24px;
             margin-right: 10px;
+            cursor: pointer;
         }
-        .title {
-            font-size: 1.5rem;
+
+        /* Form Labels */
+        .label {
             font-weight: bold;
+            margin-top: 15px;
         }
 
-        /* Labels and input fields */
-        .form-label {
-            color: #bbb;
-            font-size: 0.9rem;
-        }
-        .form-control {
-            background-color: #1e1e1e; /* Keep the background dark */
+        /* Input Fields */
+        .input-field {
+            background: none;
             border: none;
-            border-bottom: 1px solid #444;
-            color: #fff; /* Text color remains white */
-            padding: 5px 0;
-            width: 50%; /* Take half the screen width */
-        }
-        .form-control:focus {
-            box-shadow: none;
-            border-color: #28a745; /* Focus border color */
-            background-color: #1e1e1e; /* Keep background dark on focus */
-        }
-        .form-control::placeholder {
-            color: #fff; /* Placeholder text color */
-            opacity: 0.7; /* Slightly less opaque */
+            border-bottom: 1px solid #666;
+            color: #FFF;
+            width: 40%;
+            padding: 5px;
+            margin-top: 5px;
         }
 
-        /* Split options buttons */
-        .split-options button {
-            background-color: #2c2c2c;
-            border: 1px solid #444;
-            color: #ccc;
-            margin-right: 5px;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            padding: 8px 12px;
-        }
-        .split-options .active {
-            color: #28a745;
-            border-color: #28a745; /* Active green border */
-        }
-        .split-options .owe-full {
-            color: #f44336;
-            border-color: #f44336; /* Red border for owing full */
+        /* Expense Buttons */
+        .expense-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        /* Summary message */
-        .summary {
-            color: #bbb;
-            font-size: 0.9rem;
-            margin-top: 10px;
+        .expense-button {
+            border: 1px solid #333;
+            color: #FFF;
+            font-weight: bold;
+            padding: 10px 15px;
+            border-radius: 20px;
+            background: none;
+            cursor: pointer;
+            transition: border-color 0.3s;
         }
 
-        /* Add Expense button */
-        .btn-add-expense {
-            width: auto; /* Smaller button */
-            background-color: #28a745;
-            border: none;
-            color: #fff;
+        .expense-button.green-border {
+            border-color: #00B389;
+        }
+
+        .expense-button.orange-border {
+            border-color: #ff330a;
+        }
+
+        .expense-button:hover {
+            border-color: #FFF;
+        }
+
+        /* Summary Text */
+        .summary-text {
             margin-top: 20px;
-            padding: 10px 20px;
+            font-size: 16px;
+            color: #FFF;
         }
+
+        /* Add Expenses Button */
+        .add-expenses-btn {
+            border: 2px solid #00B389;
+            color: #ffffff;
+            font-weight: bold;
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-top: 20px;
+            background: none;
+            display: block;
+            width: fit-content;
+        }
+
+        /* Plus Icon */
+        .plus-icon {
+            color: #fff;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+        }
+
+        /* Box around FirstName */
+        .name-box {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 2px solid #B3B3B3;
+            border-radius: 5px;
+            color: ##B3B3B3;
+            font-weight: bold;
+            
+}
+
+        
     </style>
 </head>
 <body>
@@ -108,58 +132,47 @@
 
     ?>
 
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            // Toggle active state for split options
-            $('.split-options button').on('click', function() {
-                $('.split-options button').removeClass('active owe-full');
-                $(this).addClass($(this).hasClass('owe-full') ? 'owe-full' : 'active');
-            });
+    <!-- Page Header -->
+    <div class="page-header">
+        <span class="back-arrow">&larr;</span>
+        <span>Add Expense</span>
+    </div>
+    <br>
+    <!-- Expense Form -->
+    <div>
+        <div class="label">With you and:
+            <span class="name-box">FirstName</span>
+            <span class="plus-icon">+</span>
+        </div>
+        <br>
+        <br>
+        <div class="label">Description:              
+        <input type="text" class="input-field" placeholder="">
+        </div>
+        <br>
+        <br>    
+        <div class="label">Amount:   
+        <input type="text" class="input-field" placeholder="">
+        </div>
+        <br>    
+        <div class="label">How was the expense split?</div>
+        <div class="expense-buttons">
+            <button class="expense-button green-border">You paid and split equally</button>
+            <button class="expense-button">You are owed the full amount</button>
+            
+        </div>
+        <div class="expense-buttons">
+            
+            <button class="expense-button">FirstName is owed the full amount</button>
+            <button class="expense-button orange-border">FirstName paid and split equally</button>
+        </div>
 
-            // Add expense button functionality
-            $('.btn-add-expense').on('click', function() {
-                alert('Expense added successfully!');
-            });
-        });
-    </script>
+        <div class="summary-text">
+            You/FirstName owes Rs: 1200 to FirstName/You
+        </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-     <!-- Header -->
-     <div class="header">
-        <span class="back-arrow" onclick="window.location.href='home.html'">&larr;</span>
-        <span class="title">Add Expense</span>
+        <button class="add-expenses-btn">Add Expenses</button>
     </div>
 
-    <!-- Form Elements -->
-    <form>
-        <div class="mb-3">
-            <label class="form-label">With you and:</label>
-            <input type="text" class="form-control" placeholder="FirstName">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Description:</label>
-            <input type="text" class="form-control" placeholder="Enter description">
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Amount:</label>
-            <input type="number" class="form-control" placeholder="Enter amount">
-        </div>
-
-        <!-- Split Options -->
-        <div class="split-options">
-            <button type="button" class="btn" id="split-equally">You paid and split equally</button>
-            <button type="button" class="btn" id="owed-full">You are owed the full amount</button>
-            <button type="button" class="btn" id="owed-full-name">FirstName is owed the full amount</button>
-            <button type="button" class="btn" id="split-equally-name">FirstName paid and split equally</button>
-        </div>
-
-        <!-- Summary -->
-        <div class="summary">You/FirstName owes Rs: 1200 to FirstName/You</div>
-
-        <!-- Add Expense Button -->
-        <button type="button" class="btn btn-add-expense">Add Expenses</button>
-    </form>
 </body>
 </html>
