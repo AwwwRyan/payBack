@@ -126,6 +126,9 @@ if ($friend_id) {
         .balance-negative {
             color: #ff5667;
         }
+        .balance-zero {
+            color: #fff; /* White color for zero balance */
+        }
     </style>
 </head>
 <body>
@@ -137,7 +140,15 @@ if ($friend_id) {
                 &nbsp;&nbsp;&nbsp;&nbsp;
                 <span class="header-title fs-5 fw-bold"><?php echo htmlspecialchars($friend_name); ?></span>
             </div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-            <div class="balance fs-5 fw-bold <?php echo $balance > 0 ? 'balance-positive' : 'balance-negative'; ?>">
+            <div class="balance fs-5 fw-bold <?php 
+                if ($balance > 0) {
+                    echo 'balance-positive';
+                } elseif ($balance < 0) {
+                    echo 'balance-negative';
+                } else {
+                    echo 'balance-zero'; // New class for zero balance
+                }
+            ?>">
                 Rs. <?php echo number_format(abs($balance), 2); ?>
             </div>
         </div><br>

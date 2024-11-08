@@ -187,6 +187,10 @@ if ($user_id > 0) {
             color: #ff5667;
         }
 
+        .amount-zero {
+            color: #fff; /* White color for zero balance */
+        }
+
         .activity-item {
             color: #FFFFFF;
             padding: 0.5rem 0;
@@ -250,11 +254,27 @@ if ($user_id > 0) {
                             <div>
                                 <p class="friend-name"><?php echo htmlspecialchars($friend['name']); ?></p>
                                 <p class="friend-status">
-                                    <?php echo $friend['balance'] > 0 ? 'Owes you' : 'You owe'; ?>
+                                    <?php 
+                                    if ($friend['balance'] > 0) {
+                                        echo 'Owes you';
+                                    } elseif ($friend['balance'] < 0) {
+                                        echo 'You owe';
+                                    } else {
+                                        echo 'No one owes anything';
+                                    }
+                                    ?>
                                 </p>
                             </div>
                             <div>
-                                <p class="amount <?php echo $friend['balance'] > 0 ? 'amount-positive' : 'amount-negative'; ?>">
+                                <p class="amount <?php 
+                                    if ($friend['balance'] > 0) {
+                                        echo 'amount-positive';
+                                    } elseif ($friend['balance'] < 0) {
+                                        echo 'amount-negative';
+                                    } else {
+                                        echo 'amount-zero'; // New class for zero balance
+                                    }
+                                ?>">
                                     Rs. <?php echo number_format(abs($friend['balance']), 2); ?>
                                 </p>
                             </div>

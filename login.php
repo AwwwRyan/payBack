@@ -42,6 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Login</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -68,12 +69,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             });
 
+            // Validate Username
+            const username = document.querySelector('input[placeholder="Username"]').value;
+            if (username.trim() === '') {
+                valid = false;
+                showError('Username cannot be empty', 'Username');
+            }
+
             // Validate Password
             const password = document.querySelector('input[placeholder="Password"]').value;
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-            if (password.length < 6 || !passwordRegex.test(password)) {
+            if (password.trim() === '') {
                 valid = false;
-                showError('Password must be a special character', 'Password');
+                showError('Password cannot be empty', 'Password');
+            } else {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+                if (!passwordRegex.test(password)) {
+                    valid = false;
+                    showError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 'Password');
+                }
             }
 
             return valid;
@@ -98,6 +111,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
         });
     </script>
+
+    <style>
+        .payback-text {
+        font-family: 'Staatliches', sans-serif;
+        font-weight: 400;
+        font-size: 60px;
+        line-height: 75px;
+        color: #fff;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+        text-decoration: none; 
+    }
+    </style>
 </head>
 
 <body class="bg-dark text-white">
@@ -107,8 +135,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="download.png" alt="Login Illustration" class="img-fluid" style="max-width: 80%;">
             </div>
             <div class="col-lg-6">
-                <h1 class="app-name">APP NAME</h1>
-                <h3 class="mb-4">LOGIN</h3>
+
+                <h3 class="mb-4 payback-text">PAYBACK</h3>
                 <form method="POST">
                     <div class="mb-3">
                         <input type="text" name="username" class="form-control custom-input" placeholder="Username">

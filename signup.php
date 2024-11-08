@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>Sign Up</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
         $(document).ready(function() {
@@ -53,23 +54,29 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             // Validate Name
             const name = document.querySelector('input[placeholder="Name"]').value;
-            if (name.length < 2) {
+            if (name.trim() === '') {
                 valid = false;
-                showError('Name must be at least 2 characters long.', 'Name');
+                showError('Username cannot be empty', 'Name');
             }
 
             // Validate Username
             const username = document.querySelector('input[placeholder="Username"]').value;
-            if (username.length < 3) {
+            if (username.trim() === '') {
                 valid = false;
-                showError('Username must be at least 3 characters long.', 'Username');
+                showError('Username cannot be empty', 'Username');
             }
 
             // Validate Password
             const password = document.querySelector('input[placeholder="Password"]').value;
-            if (password.length < 6) {
+            if (password.trim() === '') {
                 valid = false;
-                showError('Password must be at least 6 characters long.', 'Password');
+                showError('Password cannot be empty', 'Password');
+            } else {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+                if (!passwordRegex.test(password)) {
+                    valid = false;
+                    showError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character', 'Password');
+                }
             }
 
             // Validate Confirm Password
@@ -101,6 +108,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
         });
     </script>
+    <style>
+         .payback-text {
+        font-family: 'Staatliches', sans-serif;
+        font-weight: 400;
+        font-size: 60px;
+        line-height: 75px;
+        color: #fff;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+        text-decoration: none; 
+    }
+    </style>
 </head>
 <body class="bg-dark text-white">
     
@@ -110,8 +131,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="download.png" alt="Sign Up Illustration" class="img-fluid" style="max-width: 80%;">
             </div>
             <div class="col-lg-6">
-                <h1 class="app-name">APP NAME</h1>
-                <h3 class="mb-4">SIGN UP</h3>
+            <h3 class="mb-4 payback-text">PAYBACK</h3>
+            <h3 class="mb-4">SIGN UP</h3>
                 <form method="POST">
                     <div class="mb-3">
                         <input type="text" name="name" class="form-control custom-input" placeholder="Name" >

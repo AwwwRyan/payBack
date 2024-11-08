@@ -277,7 +277,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['description'], $_POST[
 
         <div class="summary-text">
             <!-- Display the owed amount dynamically here based on user selection -->
-            <span id="splitSummary">You owe Rs: 0</span>
+            <span id="splitSummary"></span>
         </div>
 
         <!-- Hidden inputs for the form -->
@@ -380,15 +380,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['description'], $_POST[
         if (splitOption === 'equal') {
             const totalParticipants = <?php echo count($friend_names) + 1; ?>; // Including the payer
             const perPersonAmount = amount / totalParticipants;
-            summaryText = "Each person owes Rs: " + perPersonAmount.toFixed(2);
+            summaryText = "Each person owe Rs: " + perPersonAmount.toFixed(2);
 
-            // Include the payer in the participant amounts
-            participantAmounts[payerId] = perPersonAmount;
+            // Do not include the payer in the participant amounts
+             participantAmounts[payerId] = perPersonAmount;
             summaryText += `<br>You owe Rs: ${perPersonAmount.toFixed(2)}`;
 
             <?php foreach ($friend_names as $friend_name): ?>
                 participantAmounts["<?php echo $friend_name; ?>"] = perPersonAmount;
-                summaryText += `<br><?php echo $friend_name; ?> owes Rs: ${perPersonAmount.toFixed(2)}`;
+                summaryText += `<br><?php echo $friend_name; ?> owe Rs: ${perPersonAmount.toFixed(2)}`;
             <?php endforeach; ?>
         } else if (splitOption === 'individual') {
             const totalSelected = selectedNames.length;
@@ -397,9 +397,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['description'], $_POST[
                 summaryText = "Selected participants owe Rs: " + perPersonAmount.toFixed(2) + " each";
 
                 selectedNames.forEach(name => {
-                    if (name !== 'Me' && name !== payerId) { // Ensure the payer is not included
+                    if (name !== 'Me' && name !== payerId) { 
                         participantAmounts[name] = perPersonAmount;
-                        summaryText += `<br>${name} owes Rs: ${perPersonAmount.toFixed(2)}`;
+                        summaryText += `<br>${name} owe Rs: ${perPersonAmount.toFixed(2)}`;
                     }
                 });
             } else {
@@ -417,7 +417,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['description'], $_POST[
             participantAmounts: participantAmounts
         });
 
-        alert("Form submission successful! Check the console for details.");
     }
 </script>
 

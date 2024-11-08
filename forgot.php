@@ -31,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Forgot Password</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script>
@@ -46,28 +47,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         function validateForgotPasswordForm() {
             let valid = true;
 
-            
+            // Clear previous invalid classes and messages
             document.querySelectorAll('.custom-input').forEach(input => {
                 input.classList.remove('is-invalid');
                 const errorMessage = input.nextElementSibling;
                 if (errorMessage) {
-                    errorMessage.innerHTML = ''; 
+                    errorMessage.innerHTML = ''; // Clear previous messages
                 }
             });
 
-            const username = document.querySelector('input[name="username"]').value;
-            if (username.length < 3) {
+            // Validate Username
+            const username = document.querySelector('input[placeholder="Username"]').value;
+            if (username.trim() === '') {
                 valid = false;
-                showError('Username must be at least 3 characters long.', 'Username');
+                showError('Username cannot be empty', 'Username');
             }
 
+            // Validate New Password
             const newPassword = document.querySelector('input[name="new_password"]').value;
-            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
-            if (!passwordRegex.test(newPassword)) {
+            if (newPassword.trim() === '') {
                 valid = false;
-                showError('Password must be at least 6 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.', 'New Password');
+                showError('Password cannot be empty', 'New Password');
+            } else {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/;
+                if (!passwordRegex.test(newPassword)) {
+                    valid = false;
+                    showError('Password must be at least 6 characters long and include at least one uppercase letter, one lowercase letter, one number, and one special character.', 'New Password');
+                }
             }
 
+            // Validate Confirm Password
             const confirmPassword = document.querySelector('input[name="confirm_password"]').value;
             if (newPassword !== confirmPassword) {
                 valid = false;
@@ -95,6 +104,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             });
         });
     </script>
+    <style>
+         .payback-text {
+        font-family: 'Staatliches', sans-serif;
+        font-weight: 400;
+        font-size: 60px;
+        line-height: 75px;
+        color: #fff;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+        text-decoration: none; 
+    }
+    </style>
 </head>
 <body class="bg-dark text-white">
     <div class="container d-flex justify-content-center align-items-center vh-100">
@@ -103,8 +126,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <img src="download.png" alt="Forgot Password Illustration" class="img-fluid" style="max-width: 80%;">
             </div>
             <div class="col-lg-6">
-                <h1 class="app-name">APP NAME</h1>
-                <h3 class="mb-4">FORGOT PASSWORD</h3>
+            <h3 class="mb-4 payback-text">PAYBACK</h3>
+            <h3 class="mb-4">FORGOT PASSWORD</h3>
                 <form method="POST">
                     <div class="mb-3">
                         <input type="text" name="username" class="form-control custom-input" placeholder="Username">

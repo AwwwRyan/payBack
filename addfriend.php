@@ -185,7 +185,7 @@ unset($_SESSION['error_message']);
     <?php endif; ?>
 
     <div class="d-flex align-items-center mb-3">
-      <a href="homepage.php?user_id=<?php echo $user_id; ?>" class="payback-text">PAYBACK</a>
+      <a href="homepage.php " class="payback-text">PAYBACK</a>
       <form class="search-bar d-flex" method="POST" action="">
   <input type="text" name="search_term" id="searchInput" placeholder="Search" value="<?php echo htmlspecialchars($searchTerm); ?>" />
   <button type="submit" class="btn btn-grey ms-2">Search</button>
