@@ -1,3 +1,36 @@
+<?php
+session_start();
+include 'db_connect.php'; // Include your database connection
+
+$user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
+
+// Handle selected friends (coming from addtolist.php)
+$selected_friends = isset($_POST['friends']) ? $_POST['friends'] : [];
+
+// Fetch the names of the selected friends
+$friend_names = [];
+if (!empty($selected_friends)) {
+    $placeholders = implode(',', array_fill(0, count($selected_friends), '?'));
+    $stmt = $conn->prepare("SELECT name FROM users WHERE user_id IN ($placeholders)");
+    $stmt->bind_param(str_repeat('i', count($selected_friends)), ...$selected_friends);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $friend_names[] = $row['name'];
+    }
+}
+
+// Handle form submission
+if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['description'], $_POST['amount'], $_POST['split_option'])) {
+    $description = $_POST['description'];
+    $amount = $_POST['amount'];
+    $split_option = $_POST['split_option'];
+    $selected_names = isset($_POST['selected_names']) ? explode(', ', $_POST['selected_names']) : [];
+
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -6,7 +39,6 @@
     <title>Add Expense</title>
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <style>
-        /* Body and Background */
         body {
             background-color: #141414;
             color: #FFFFFF;
@@ -14,7 +46,6 @@
             padding: 20px;
         }
 
-        /* Page Header */
         .page-header {
             font-size: 20px;
             font-weight: bold;
@@ -29,13 +60,11 @@
             cursor: pointer;
         }
 
-        /* Form Labels */
         .label {
             font-weight: bold;
             margin-top: 15px;
         }
 
-        /* Input Fields */
         .input-field {
             background: none;
             border: none;
@@ -46,46 +75,61 @@
             margin-top: 5px;
         }
 
-        /* Expense Buttons */
-        .expense-buttons {
-            display: flex;
-            flex-wrap: wrap;
+        .friend-names {
+            display: inline-flex;
             gap: 10px;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
+
+        .name-box {
+            display: inline-block;
+            padding: 5px 10px;
+            border: 2px solid #B3B3B3;
+            border-radius: 5px;
+            color: #B3B3B3;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .name-box.selected {
+            background-color: #00B389;
+            color: #fff;
+        }
+
+        .split-option {
+            display: flex;
+            gap: 15px;
             margin-top: 15px;
         }
 
         .expense-button {
-            border: 1px solid #333;
+            border: 1px solid #fff;
             color: #FFF;
             font-weight: bold;
             padding: 10px 15px;
             border-radius: 20px;
             background: none;
             cursor: pointer;
-            transition: border-color 0.3s;
+            transition: border-color 0.3s, color 0.3s;
         }
 
-        .expense-button.green-border {
+        .expense-button.selected {
             border-color: #00B389;
-        }
-
-        .expense-button.orange-border {
-            border-color: #ff330a;
+            color: #00B389;
         }
 
         .expense-button:hover {
             border-color: #FFF;
         }
 
-        /* Summary Text */
         .summary-text {
             margin-top: 20px;
             font-size: 16px;
             color: #FFF;
         }
 
-        /* Add Expenses Button */
-        .add-expenses-btn {
+        .add-expenses-btn, .calculate-btn {
             border: 2px solid #00B389;
             color: #ffffff;
             font-weight: bold;
@@ -93,11 +137,9 @@
             padding: 10px 20px;
             margin-top: 20px;
             background: none;
-            display: block;
-            width: fit-content;
+            display: inline-block;
         }
 
-        /* Plus Icon */
         .plus-icon {
             color: #fff;
             font-weight: bold;
@@ -106,73 +148,280 @@
             margin-left: 10px;
         }
 
-        /* Box around FirstName */
-        .name-box {
-            display: inline-block;
-            padding: 5px 10px;
-            border: 2px solid #B3B3B3;
-            border-radius: 5px;
-            color: ##B3B3B3;
-            font-weight: bold;
-            
-}
+        /* Disabled state */
+        .disabled {
+            pointer-events: none;
+            opacity: 0.5;
+        }
 
-        
+        .error {
+            color: #FF0000;
+            margin-left: 10px;
+        }
     </style>
+    <script>
+        function validateForm() {
+            let isValid = true;
+            const description = document.forms["expenseForm"]["description"].value;
+            const amount = document.forms["expenseForm"]["amount"].value;
+            const descriptionError = document.getElementById("descriptionError");
+            const amountError = document.getElementById("amountError");
+
+            descriptionError.textContent = "";
+            amountError.textContent = "";
+
+            if (description.trim() === "") {
+                descriptionError.textContent = "Description is required.";
+                isValid = false;
+            }
+            if (isNaN(amount) || amount.trim() === "") {
+                amountError.textContent = "Amount must be a number.";
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function selectPaidBy(element, name) {
+            // Deselect all other options
+            const nameBoxes = document.querySelectorAll('.friend-names .name-box');
+            nameBoxes.forEach(box => box.classList.remove('selected'));
+
+            // Select the clicked option
+            element.classList.add('selected');
+
+            // Update the hidden input for the payer
+            document.getElementById('paid_by').value = name;
+        }
+    </script>
 </head>
 <body>
-<?php
-    
-    $dbHost = 'localhost';  
-    $dbName = 'payback';
-    $dbUsername = 'root';
-    $dbPassword = '';
 
-    $conn = mysqli_connect($dbHost, $dbUsername, $dbPassword, $dbName);
+<!-- Page Header -->
+<div class="page-header">
+    <a href="homepage.php">
+        <img src="arrow.png" alt="Back" class="back-arrow">
+    </a>
+    <span>Add Expense</span>
+</div>
+<br>
 
-    ?>
-
-    <!-- Page Header -->
-    <div class="page-header">
-        <span class="back-arrow">&larr;</span>
-        <span>Add Expense</span>
+<!-- Expense Form -->
+<div>
+    <div class="label">With you and:
+        <div class="friend-names">
+            <?php foreach ($friend_names as $friend_name): ?>
+                <div class="name-box disabled" onclick="selectName(this, '<?php echo htmlspecialchars($friend_name); ?>')">
+                    <?php echo htmlspecialchars($friend_name); ?>
+                </div>
+            <?php endforeach; ?>
+        </div>
+        <a href="addtolist.php">
+            <span class="plus-icon">+</span>
+        </a>
     </div>
     <br>
-    <!-- Expense Form -->
-    <div>
-        <div class="label">With you and:
-            <span class="name-box">FirstName</span>
-            <span class="plus-icon">+</span>
+
+    <form name="expenseForm" method="POST" action="" onsubmit="return validateForm()">
+        <!-- Description Input -->
+        <div class="label">Description:
+            <input type="text" class="input-field" name="description" >
+            <span class="error" id="descriptionError"></span>
+        </div>
+        <br><br>
+
+        <!-- Amount Input -->
+        <div class="label">Amount:
+            <input type="text" class="input-field" name="amount" id="amountInput">
+            <span class="error" id="amountError"></span>
         </div>
         <br>
-        <br>
-        <div class="label">Description:              
-        <input type="text" class="input-field" placeholder="">
+
+        <!-- Paid By Section -->
+        <div class="label">Paid by:
+            <div class="friend-names">
+                <div class="name-box" onclick="selectPaidBy(this, 'Me')">Me</div>
+                <?php foreach ($friend_names as $friend_name): ?>
+                    <div class="name-box" onclick="selectPaidBy(this, '<?php echo htmlspecialchars($friend_name); ?>')">
+                        <?php echo htmlspecialchars($friend_name); ?>
+                    </div>
+                <?php endforeach; ?>
+            </div>
         </div>
-        <br>
-        <br>    
-        <div class="label">Amount:   
-        <input type="text" class="input-field" placeholder="">
+
+        <!-- Split option -->
+        <div class="label">How would you like to split the expense?</div>
+<div class="split-option">
+    <button type="button" class="expense-button" onclick="selectSplitOption(this, 'equal')">Equally</button>
+    <button type="button" class="expense-button" onclick="selectSplitOption(this, 'individual')">By Individual</button>
+    <span class="error" id="splitError"></span>
+</div>
+
+
+
+<!-- Names to Split Section -->
+<div class="label">Names to Split:</div>
+<div class="friend-names" id="namesToSplit">
+    <div class="name-box" onclick="selectNameToSplit(this, 'You')">You</div>
+    <?php foreach ($friend_names as $friend_name): ?>
+        <div class="name-box" onclick="selectNameToSplit(this, '<?php echo htmlspecialchars($friend_name); ?>')">
+            <?php echo htmlspecialchars($friend_name); ?>
         </div>
-        <br>    
-        <div class="label">How was the expense split?</div>
-        <div class="expense-buttons">
-            <button class="expense-button green-border">You paid and split equally</button>
-            <button class="expense-button">You are owed the full amount</button>
-            
-        </div>
-        <div class="expense-buttons">
-            
-            <button class="expense-button">FirstName is owed the full amount</button>
-            <button class="expense-button orange-border">FirstName paid and split equally</button>
-        </div>
+    <?php endforeach; ?>
+</div>
+<!-- Individual Amount Inputs -->
+<div id="individualAmounts" style="display: none;">
+    <div class="label">Enter amounts for each participant:</div>
+    <div id="individualAmountInputs"></div>
+</div>
 
         <div class="summary-text">
-            You/FirstName owes Rs: 1200 to FirstName/You
+            <!-- Display the owed amount dynamically here based on user selection -->
+            <span id="splitSummary">You owe Rs: 0</span>
         </div>
 
-        <button class="add-expenses-btn">Add Expenses</button>
-    </div>
+        <!-- Hidden inputs for the form -->
+        <input type="hidden" name="split_option" id="split_option">
+        <input type="hidden" name="paid_by" id="paid_by" value="<?php echo $_SESSION['user_id']; ?>">
+        <input type="hidden" name="selected_names" id="selected_names">
+        
+        <button type="button" class="add-expenses-btn" onclick="calculateAndSubmitForm()">Add Expenses</button>
+    </form>
+</div>
+
+<script>
+    let splitOption = '';
+    let selectedNames = []; // Array to hold selected participant names for individual split
+
+    function validateForm() {
+        let isValid = true;
+        const description = document.forms["expenseForm"]["description"].value.trim();
+        const amount = document.forms["expenseForm"]["amount"].value.trim();
+        const splitOption = document.getElementById('split_option').value;
+        const descriptionError = document.getElementById("descriptionError");
+        const amountError = document.getElementById("amountError");
+        const splitError = document.getElementById("splitError");
+
+        // Clear previous error messages
+        descriptionError.textContent = "";
+        amountError.textContent = "";
+        splitError.textContent = "";
+
+        // Validate description
+        if (description === "") {
+            descriptionError.textContent = "Description is required.";
+            isValid = false;
+        }
+
+        // Validate amount
+        if (isNaN(amount) || amount === "") {
+            amountError.textContent = "Amount must be a number.";
+            isValid = false;
+        }
+
+        // Validate split option selection
+        if (!splitOption) {
+            splitError.textContent = "Please select a split option.";
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    function selectSplitOption(button, value) {
+        const buttons = document.querySelectorAll('.expense-button');
+        buttons.forEach(btn => btn.classList.remove('selected'));
+        button.classList.add('selected');
+        splitOption = value;
+        document.getElementById('split_option').value = value;
+
+        const namesToSplit = document.getElementById('namesToSplit');
+
+        if (value === 'equal') {
+            namesToSplit.classList.add('disabled');
+            selectedNames = []; // Clear selection if switching to equal
+        } else {
+            namesToSplit.classList.remove('disabled');
+        }
+    }
+
+    function selectNameToSplit(element, name) {
+        if (splitOption !== 'individual') return; // Only allow selection in individual split
+
+        // Toggle selection state for the clicked name
+        element.classList.toggle('selected');
+        if (element.classList.contains('selected')) {
+            selectedNames.push(name);
+        } else {
+            selectedNames = selectedNames.filter(n => n !== name);
+        }
+
+        // Update the hidden input for selected names
+        document.getElementById('selected_names').value = selectedNames.join(", ");
+    }
+
+    function calculateAndSubmitForm() {
+        if (!validateForm()) return;
+
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        const description = document.forms["expenseForm"]["description"].value.trim();
+        let payerId = document.getElementById('paid_by').value;
+        const splitOption = document.getElementById('split_option').value;
+        const splitSummary = document.getElementById("splitSummary");
+
+        // Map "Me" to the actual user ID
+        if (payerId === 'Me') {
+            payerId = <?php echo json_encode($_SESSION['user_id']); ?>;
+        }
+
+        let summaryText = "";
+        let participantAmounts = {};
+
+        if (splitOption === 'equal') {
+            const totalParticipants = <?php echo count($friend_names) + 1; ?>; // Including the payer
+            const perPersonAmount = amount / totalParticipants;
+            summaryText = "Each person owes Rs: " + perPersonAmount.toFixed(2);
+
+            // Include the payer in the participant amounts
+            participantAmounts[payerId] = perPersonAmount;
+            summaryText += `<br>You owe Rs: ${perPersonAmount.toFixed(2)}`;
+
+            <?php foreach ($friend_names as $friend_name): ?>
+                participantAmounts["<?php echo $friend_name; ?>"] = perPersonAmount;
+                summaryText += `<br><?php echo $friend_name; ?> owes Rs: ${perPersonAmount.toFixed(2)}`;
+            <?php endforeach; ?>
+        } else if (splitOption === 'individual') {
+            const totalSelected = selectedNames.length;
+            if (totalSelected > 0) {
+                const perPersonAmount = amount / totalSelected;
+                summaryText = "Selected participants owe Rs: " + perPersonAmount.toFixed(2) + " each";
+
+                selectedNames.forEach(name => {
+                    if (name !== 'Me' && name !== payerId) { // Ensure the payer is not included
+                        participantAmounts[name] = perPersonAmount;
+                        summaryText += `<br>${name} owes Rs: ${perPersonAmount.toFixed(2)}`;
+                    }
+                });
+            } else {
+                summaryText = "No participants selected for individual split.";
+            }
+        }
+
+        splitSummary.innerHTML = summaryText;
+
+        console.log({
+            payer_id: payerId,
+            description: description,
+            amount: amount,
+            split_option: splitOption,
+            participantAmounts: participantAmounts
+        });
+
+        alert("Form submission successful! Check the console for details.");
+    }
+</script>
+
+
 
 </body>
 </html>

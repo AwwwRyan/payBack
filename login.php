@@ -1,5 +1,6 @@
 <?php
 include 'db_connect.php';
+session_start(); // Start the session
 
 $errorMessage = '';
 
@@ -20,7 +21,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $rowUserId = mysqli_fetch_assoc($resultUserId);
             $userId = $rowUserId['user_id'];
             
-            header("Location: home.php?user_id=$userId");
+            $_SESSION['user_id'] = $userId;
+            $_SESSION['username'] = $username;
+            header("Location: homepage.php");
             exit();
         } else {
             $errorMessage = "Incorrect password.";
@@ -64,13 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     errorMessage.innerHTML = ''; 
                 }
             });
-
-            // Validate Username
-            const username = document.querySelector('input[placeholder="Username"]').value;
-            if (username.length < 5) {
-                valid = false;
-                showError('Username must be at least 5 characters long.', 'Username');
-            }
 
             // Validate Password
             const password = document.querySelector('input[placeholder="Password"]').value;

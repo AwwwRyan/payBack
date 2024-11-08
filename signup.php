@@ -10,7 +10,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($password === $confirmPassword) {
         $query = "INSERT INTO Users (username, password, name) VALUES ('$username', '$password', '$name')";
         if (mysqli_query($conn, $query)) {
-            header("Location: home.php");
+            header("Location: login.php");
             exit();
         } else {
             echo "Error: " . $query . "<br>" . mysqli_error($conn);

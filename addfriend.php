@@ -1,9 +1,12 @@
 <?php
 include 'db_connect.php';
-session_start(); // Start the session to store error messages
+session_start(); // Start the session
 
 // Fetch user_id from URL
 $user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
+// Handle search query
+$searchTerm = isset($_POST['search_term']) ? mysqli_real_escape_string($conn, $_POST['search_term']) : '';
 
 // Fetch all friends of the current user
 $friendsQuery = "SELECT friend_id FROM Friends WHERE user_id = $user_id";
@@ -18,8 +21,14 @@ if ($friendsResult) {
 // Convert friends array to a comma-separated string for the SQL query
 $friendsList = implode(',', $friends);
 
-// Fetch all users from the Users table excluding friends
-$query = "SELECT user_id, name FROM Users" . (count($friends) > 0 ? " WHERE user_id NOT IN ($friendsList)" : "");
+// Build the query to fetch all users, excluding friends and the current user
+$query = "SELECT user_id, name FROM Users WHERE user_id != $user_id" . (count($friends) > 0 ? " AND user_id NOT IN ($friendsList)" : "");
+
+// Add search filtering if a search term is provided
+if (!empty($searchTerm)) {
+    $query .= " AND name LIKE '%$searchTerm%'";
+}
+
 $result = mysqli_query($conn, $query);
 $users = [];
 if ($result) {
@@ -62,6 +71,8 @@ unset($_SESSION['error_message']);
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Search Page</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Staatliches&display=swap" rel="stylesheet">
+
   <style>
     body {
       background-color: #1a1a1a;
@@ -113,6 +124,17 @@ unset($_SESSION['error_message']);
       gap: 5px;
     }
 
+    .btn-grey {
+  background-color: #888; /* Grey color */
+  border: none;
+  color: #ffffff;
+}
+
+.btn-grey:hover {
+  background-color: #5a6268; /* Slightly darker grey on hover */
+}
+
+
     .list-group-item .btn {
       color: white;
       background: #3a3a3a;
@@ -136,6 +158,19 @@ unset($_SESSION['error_message']);
       max-width: 1000px;
       margin: auto;
     }
+
+    .payback-text {
+        font-family: 'Staatliches', sans-serif;
+        font-weight: 400;
+        font-size: 60px;
+        line-height: 75px;
+        color: #fff;
+        text-align: left;
+        display: flex;
+        align-items: center;
+        margin-right: 20px;
+        text-decoration: none; 
+    }
   </style>
 </head>
 <body>
@@ -150,10 +185,12 @@ unset($_SESSION['error_message']);
     <?php endif; ?>
 
     <div class="d-flex align-items-center mb-3">
-      <span class="back-arrow me-3">&#8592;</span> <!-- Back arrow icon -->
-      <div class="search-bar">
-        <input type="text" id="searchInput" placeholder="Search" />
-      </div>
+      <a href="homepage.php?user_id=<?php echo $user_id; ?>" class="payback-text">PAYBACK</a>
+      <form class="search-bar d-flex" method="POST" action="">
+  <input type="text" name="search_term" id="searchInput" placeholder="Search" value="<?php echo htmlspecialchars($searchTerm); ?>" />
+  <button type="submit" class="btn btn-grey ms-2">Search</button>
+</form>
+
     </div>
 
     <div class="flex-container">
@@ -175,16 +212,5 @@ unset($_SESSION['error_message']);
   </div>
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-  <script>
-    $(document).ready(function(){
-      $('#searchInput').on('input', function() {
-        const query = $(this).val().toLowerCase();
-        $('.list-group-item').each(function() {
-          const name = $(this).find('.name').text().toLowerCase();
-          $(this).toggle(name.includes(query));
-        });
-      });
-    });
-  </script>
 </body>
 </html>
